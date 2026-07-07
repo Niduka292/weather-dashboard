@@ -1,0 +1,34 @@
+pipeline{
+    agent any
+    environment{
+        dockerImage =''
+        registry = 'nidukajayathunga/myimg1'
+        registryCridential = 'e9fab0ee-136f-47ca-ab9e-2d6cbc8ea55b'
+    }
+    stages{
+        stage('gitpull')
+        {
+            steps{
+                checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/Niduka292/weather-dashboard/']])
+            }
+        }
+        stage('build docker image'){
+            steps{
+                script{
+                    dockerImage = docker.build registry
+                }
+            }
+        }
+        stage('upload docker image'){
+            steps{
+                script{
+                    docker.withRegistry('',registryCridential){
+                        dockerImage.push()
+                    }
+                }
+                
+            }
+        }
+        
+    }
+}
